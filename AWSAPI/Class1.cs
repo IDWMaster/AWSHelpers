@@ -141,6 +141,11 @@ namespace AWSAPI
                 {
                     client = new AmazonEC2Client(accessKey, secretKey, region);
                 }
+                public async Task<IEnumerable<VirtualMachine>> GetVirtualMachinesByPrivateIps(IEnumerable<string> ips)
+                {
+                   return  (await client.DescribeInstancesAsync(new DescribeInstancesRequest() { Filters = new List<Filter>(new Filter[] { new Filter("private-ip-address", new List<string>(ips)) }) })).Reservations.SelectMany(m=>m.Instances).Select(m=>new VirtualMachine(client,m));
+                }
+
                 public async Task<IEnumerable<CloudImage>> GetImages()
                 {
                     return (await client.DescribeImagesAsync(new DescribeImagesRequest() { Owners = new List<string>(new string[] { "self" }) })).Images.Select(m => new CloudImage(m,client));
